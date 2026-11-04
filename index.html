@@ -73,7 +73,16 @@ h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--pink
 .task-columns{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .notes-area{min-height:110px}
 .footer-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:14px;color:var(--muted);font-size:11px}
+@media print{.privacy-note{color:#333;background:white;border-color:#aaa}.privacy-note strong{color:#111}.creator-footer{color:#333}.contact-links a{color:#333}}
 .small-note{font-size:10px;color:var(--muted)}
+.privacy-note{margin-top:12px;padding:12px 14px;border:1px solid #512347;border-radius:9px;background:#100e11;color:var(--muted);font-size:11px;line-height:1.6}
+.privacy-note strong{display:block;color:var(--pink2);font-size:10px;letter-spacing:.13em;margin-bottom:3px}
+.creator-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:15px 4px 8px;color:var(--muted);font-size:11px;letter-spacing:.04em}
+.creator-footer strong{color:var(--pink2);font-weight:800}
+.contact-links{display:flex;gap:16px;flex-wrap:wrap}
+.contact-links a{color:var(--pink2);text-decoration:none}
+.contact-links a:hover{text-decoration:underline;color:var(--pink)}
+
 .mobile-nav{display:none}
 @media(max-width:1100px){
  .month-layout{grid-template-columns:1fr 1fr}.calendar-panel{grid-column:1/-1}.quick-panel{grid-column:1/-1}
@@ -181,7 +190,25 @@ h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--pink
   </div>
 </section>
 </main>
-<div class="footer-row"><span>THE EVERYDAY+ · MAKE ROOM FOR YOUR LIFE</span><span id="lastSaved">Saved locally in this browser</span></div>
+<div class="footer-row">
+  <span>THE EVERYDAY+ · MAKE ROOM FOR YOUR LIFE</span>
+  <span id="lastSaved">Saved locally in this browser</span>
+</div>
+<div class="privacy-note">
+  <strong>YOUR DATA, YOUR DEVICE.</strong>
+  The Everyday+ does not collect or transmit the information you enter to a server.
+  Your planner entries are saved locally in your own browser on your device.
+  Clearing browser data, using private browsing, or switching devices or browsers may remove or prevent access to those entries.
+  Download a JSON backup regularly if you want to keep a separate copy.
+</div>
+<footer class="creator-footer">
+  <span>Made by <strong>Perla Woods</strong></span>
+  <span class="contact-links">
+    <a href="https://alliannah.com" target="_blank" rel="noopener">Alliannah.com</a>
+    <a href="https://www.instagram.com/perlawoods_/" target="_blank" rel="noopener">@perlawoods_</a>
+    <a href="https://www.instagram.com/thewholethang_/" target="_blank" rel="noopener">@thewholethang_</a>
+  </span>
+</footer>
 </div>
 <script>
 const STORE='theEverydayPlus_v1';
@@ -204,7 +231,7 @@ function renderLists(){document.querySelectorAll('[data-list]').forEach(el=>make
 function renderCalendar(){let cal=document.getElementById('calendar');cal.innerHTML='';['SUN','MON','TUE','WED','THU','FRI','SAT'].forEach(x=>{let d=document.createElement('div');d.className='weekday';d.textContent=x;cal.append(d)});let first=new Date(current.getFullYear(),current.getMonth(),1),start=first.getDay(),days=new Date(current.getFullYear(),current.getMonth()+1,0).getDate();for(let i=0;i<Math.ceil((start+days)/7)*7;i++){let cell=document.createElement('div');cell.className='day-cell';let n=i-start+1;if(n>0&&n<=days){let d=new Date(current.getFullYear(),current.getMonth(),n);if(dateKey(d)===dateKey(new Date()))cell.classList.add('today');let num=document.createElement('div');num.className='day-num';num.textContent=n;let ta=document.createElement('textarea');ta.placeholder='Add...';let k='calendar-'+dateKey(d);ta.value=getBucket()[k]||'';ta.addEventListener('input',()=>{getBucket()[k]=ta.value;save()});cell.append(num,ta)}cal.append(cell)}}
 function renderMonth(){document.getElementById('monthTitle').textContent=current.getFullYear();document.getElementById('monthLabel').textContent=current.toLocaleDateString(undefined,{month:'long',year:'numeric'});renderCalendar();hydrateFields();renderLists()}
 function renderWeek(){let start=weekStart(weekDate),end=new Date(start);end.setDate(end.getDate()+6);document.getElementById('weekLabel').textContent=start.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' – '+end.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});let grid=document.getElementById('weekGrid');grid.innerHTML='';for(let i=0;i<7;i++){let d=new Date(start);d.setDate(start.getDate()+i);let box=document.createElement('div');box.className='panel week-day';let title=document.createElement('h3');title.textContent=d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});box.append(title);let list=document.createElement('div');list.className='line-list';let key='week-'+dateKey(d);for(let j=0;j<6;j++){let row=document.createElement('label');row.className='line-row';let cb=document.createElement('input');cb.type='checkbox';let inp=document.createElement('input');inp.className='line-input';inp.placeholder=j===0?'Work / class / plans':'Add...';let b=getBucket();cb.checked=!!b[key+'-'+j+'-done'];inp.value=b[key+'-'+j]||'';cb.addEventListener('change',()=>{getBucket()[key+'-'+j+'-done']=cb.checked;save()});inp.addEventListener('input',()=>{getBucket()[key+'-'+j]=inp.value;save()});row.append(cb,inp);list.append(row)}box.append(list);grid.append(box)}hydrateFields();renderLists()}
-function renderDaily(){document.getElementById('dayLabel').textContent=dayDate.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'});document.getElementById('dayPicker').value=dateKey(dayDate);let s=document.getElementById('schedule');s.innerHTML='';for(let h=8;h<=21;h++){let t=document.createElement('div');t.className='time';t.textContent=(h%12||12)+':00 '+(h<12?'AM':'PM');let inp=document.createElement('input');let k='schedule-'+h;inp.placeholder='What is happening?';inp.value=getBucket()[k]||'';inp.addEventListener('input',()=>{getBucket()[k]=inp.value;save()});s.append(t,inp)}hydrateFields();renderLists()}
+function renderDaily(){document.getElementById('dayLabel').textContent=dayDate.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'});document.getElementById('dayPicker').value=dateKey(dayDate);let s=document.getElementById('schedule');s.innerHTML='';for(let h=6;h<=23;h++){let t=document.createElement('div');t.className='time';t.textContent=(h%12||12)+':00 '+(h<12?'AM':'PM');let inp=document.createElement('input');let k='schedule-'+h;inp.placeholder='What is happening?';inp.value=getBucket()[k]||'';inp.addEventListener('input',()=>{getBucket()[k]=inp.value;save()});s.append(t,inp)}hydrateFields();renderLists()}
 function renderAll(){renderMonth();renderWeek();renderDaily()}
 function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===id));if(id==='monthly')renderMonth();if(id==='weekly')renderWeek();if(id==='daily')renderDaily()}
 document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
