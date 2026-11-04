@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Everyday+ | Digital Planner</title>
+<style>
+:root{
+  --bg:#080808;--panel:#171317;--panel2:#211923;--pink:#ff29c8;--pink2:#f45acb;
+  --line:#a92883;--text:#f5eaf3;--muted:#b9aab6;--green:#b5f36b;
+  --shadow:0 0 18px rgba(255,41,200,.12),inset 0 0 14px rgba(255,41,200,.025);
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 15% 0%,#241021 0,transparent 35%),var(--bg);color:var(--text);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+.shell{max-width:1600px;margin:auto;padding:18px}
+.topbar{display:flex;align-items:center;gap:24px;border:1px solid var(--pink);border-radius:14px;padding:14px 20px;background:rgba(8,8,8,.94);box-shadow:var(--shadow);position:sticky;top:8px;z-index:5}
+.brand{min-width:210px}
+.brand-name{font:italic 700 30px/1 Georgia,serif;color:var(--pink);letter-spacing:-1.2px}
+.brand-sub{font-size:9px;letter-spacing:3px;color:var(--muted);margin-top:6px}
+nav{display:flex;gap:9px;flex:1;justify-content:center}
+.nav-btn,.action-btn,.month-arrow{border:1px solid var(--pink);background:transparent;color:var(--pink2);border-radius:999px;padding:9px 20px;font-size:12px;font-weight:750;letter-spacing:.08em}
+.nav-btn.active,.nav-btn:hover,.action-btn.primary{background:var(--pink);color:#100811;box-shadow:0 0 14px rgba(255,41,200,.35)}
+.tools{display:flex;align-items:center;gap:8px}
+.save-state{font-size:11px;color:var(--muted);white-space:nowrap}
+.save-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-left:4px;box-shadow:0 0 8px var(--green)}
+.icon-btn{width:36px;height:36px;border:0;background:transparent;color:var(--pink2);font-size:19px;border-radius:8px}
+.icon-btn:hover{background:#32132d}
+main{margin-top:18px}
+.page{display:none;border:1px solid var(--pink);border-radius:14px;padding:22px;background:linear-gradient(130deg,rgba(255,41,200,.045),transparent 35%),#0b090b;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.page.active{display:block}
+.page:after{content:"✦";position:absolute;right:24px;top:16px;color:rgba(255,41,200,.22);font-size:42px;pointer-events:none}
+.page-head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:18px;position:relative;z-index:1}
+.eyebrow{color:var(--pink);font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+h1{font:italic 700 clamp(30px,4vw,52px)/1 Georgia,serif;margin:5px 0 0;color:var(--text)}
+h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--pink2);margin:0 0 12px}
+h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--pink2);margin:0 0 9px}
+.date-controls{display:flex;align-items:center;gap:8px}
+.month-arrow{width:36px;height:36px;padding:0;font-size:18px}
+.date-label{color:var(--muted);font-size:12px;min-width:130px;text-align:center}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:14px;box-shadow:var(--shadow);min-width:0}
+.month-layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(330px,1fr) 175px;gap:14px}
+.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.weekday{padding:9px 4px;text-align:center;color:var(--pink);font-size:11px;font-weight:800;border-bottom:1px solid var(--line);background:#1d111c}
+.day-cell{min-height:82px;padding:7px;border-right:1px solid #5b2850;border-bottom:1px solid #5b2850;background:#0e0c0e;position:relative}
+.day-cell:nth-child(7n){border-right:0}
+.day-cell.today{background:linear-gradient(145deg,#70205d,#271326)}
+.day-num{font-size:12px;color:var(--text)}
+.day-cell textarea{width:100%;height:48px;resize:none;background:transparent;border:0;color:var(--muted);font-size:10px;padding:4px 0;outline:none}
+.day-cell textarea:focus{color:white}
+.stack{display:grid;gap:12px;align-content:start}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{width:100%;min-height:74px;resize:vertical;background:#100e11;border:1px solid #512347;border-radius:8px;padding:10px;color:var(--text);outline:none}
+.field:focus,.line-input:focus{border-color:var(--pink);box-shadow:0 0 0 2px rgba(255,41,200,.12)}
+.field::placeholder,.line-input::placeholder{color:#8c7d89}
+.line-list{display:grid;gap:8px}
+.line-row{display:flex;align-items:center;gap:8px}
+.line-row input[type=checkbox]{accent-color:var(--pink);width:15px;height:15px;flex:0 0 auto}
+.line-input{min-width:0;width:100%;background:transparent;border:0;border-bottom:1px solid #68405e;color:var(--text);padding:5px 2px;outline:none}
+.quick-actions{display:grid;gap:8px}
+.action-btn{border-radius:8px;text-align:left;letter-spacing:0;padding:10px 12px}
+.week-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.week-day{min-height:310px}
+.week-day .line-list{gap:10px}
+.week-day .line-input{font-size:11px}
+.week-lower{display:grid;grid-template-columns:1.1fr 1fr 1fr 1.2fr;gap:12px;margin-top:13px}
+.daily-layout{display:grid;grid-template-columns:minmax(260px,.8fr) minmax(0,1.3fr);gap:14px}
+.schedule{display:grid;grid-template-columns:58px 1fr;gap:5px 9px}
+.time{font-size:10px;color:var(--pink2);padding-top:9px;text-align:right}
+.schedule input{background:#100e11;border:1px solid #512347;border-radius:5px;padding:7px;color:var(--text);min-width:0;width:100%}
+.daily-right{display:grid;gap:12px}
+.task-columns{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.notes-area{min-height:110px}
+.footer-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:14px;color:var(--muted);font-size:11px}
+.small-note{font-size:10px;color:var(--muted)}
+.mobile-nav{display:none}
+@media(max-width:1100px){
+ .month-layout{grid-template-columns:1fr 1fr}.calendar-panel{grid-column:1/-1}.quick-panel{grid-column:1/-1}
+ .quick-actions{grid-template-columns:repeat(4,1fr)}
+ .week-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.week-lower{grid-template-columns:1fr 1fr}
+}
+@media(max-width:700px){
+ .shell{padding:9px}.topbar{padding:12px;gap:10px;flex-wrap:wrap;position:relative;top:auto}
+ .brand{min-width:0;flex:1}.brand-name{font-size:25px}.tools{margin-left:auto}
+ nav{order:3;flex-basis:100%;justify-content:stretch}.nav-btn{flex:1;padding:9px 5px;font-size:10px}
+ .save-state{display:none}.page{padding:13px}.page-head{align-items:flex-start;flex-direction:column}
+ .month-layout,.daily-layout{grid-template-columns:1fr}.calendar-panel,.quick-panel{grid-column:auto}
+ .day-cell{min-height:62px;padding:4px}.day-cell textarea{height:32px;font-size:9px}
+ .two-col{grid-template-columns:1fr 1fr}.quick-actions{grid-template-columns:1fr 1fr}
+ .week-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.week-day{min-height:220px}
+ .week-lower{grid-template-columns:1fr 1fr}.task-columns{grid-template-columns:1fr}
+ .schedule{grid-template-columns:48px 1fr}
+}
+@media(max-width:390px){.week-grid{grid-template-columns:1fr}.two-col,.week-lower{grid-template-columns:1fr}.date-label{min-width:100px}}
+@media print{
+ body{background:white;color:#111}.shell{padding:0;max-width:none}.topbar,.date-controls,.tools,.quick-panel,.footer-row{display:none!important}
+ .page{display:none!important;border:0;box-shadow:none;background:white;color:#111;padding:0}.page.active{display:block!important}
+ .panel,.day-cell{background:white!important;color:#111;box-shadow:none;border-color:#888}
+ h1,h2,h3,.eyebrow,.time,.weekday{color:#111!important}.field,.line-input,.schedule input,.day-cell textarea{color:#111!important;background:white!important;border-color:#aaa}
+ .calendar{border-color:#888}.day-cell{min-height:75px}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="topbar">
+  <div class="brand"><div class="brand-name">The Everyday+</div><div class="brand-sub">DIGITAL PLANNER</div></div>
+  <nav aria-label="Planner sections">
+    <button class="nav-btn active" data-page="monthly">MONTHLY</button>
+    <button class="nav-btn" data-page="weekly">WEEKLY</button>
+    <button class="nav-btn" data-page="daily">DAILY</button>
+  </nav>
+  <div class="tools">
+    <span class="save-state">Auto-save: <b id="saveLabel">On</b><i class="save-dot"></i></span>
+    <button class="icon-btn" title="Export current page as PDF" id="pdfBtn">⇩</button>
+    <button class="icon-btn" title="Download planner backup" id="backupBtn">▤</button>
+    <button class="icon-btn" title="Import planner backup" id="importBtn">⚙</button>
+    <input type="file" id="importFile" accept="application/json" hidden>
+  </div>
+</header>
+
+<main>
+<section class="page active" id="monthly">
+  <div class="page-head">
+    <div><div class="eyebrow">01 / The big picture</div><h1>Monthly Planner <span id="monthTitle"></span></h1></div>
+    <div class="date-controls"><button class="month-arrow" id="prevMonth">‹</button><div class="date-label" id="monthLabel"></div><button class="month-arrow" id="nextMonth">›</button></div>
+  </div>
+  <div class="month-layout">
+    <div class="panel calendar-panel">
+      <h2>Month at a glance ✦</h2>
+      <div class="calendar" id="calendar"></div>
+    </div>
+    <div class="stack">
+      <div class="panel"><h3>Monthly intentions ✦</h3><textarea class="field" data-key="monthly-intention" placeholder="What do I want to experience, feel, create, or make space for this month?"></textarea></div>
+      <div class="two-col">
+        <div class="panel"><h3>Monthly goals</h3><div class="line-list" data-list="monthly-goals"></div></div>
+        <div class="panel"><h3>Key dates + deadlines</h3><div class="line-list" data-list="monthly-dates"></div></div>
+      </div>
+      <div class="panel"><h3>Things I want to experience ✦</h3><textarea class="field" data-key="monthly-experiences" placeholder="Places to go, things to try, people to see..."></textarea></div>
+    </div>
+    <div class="panel quick-panel"><h3>Quick actions</h3><div class="quick-actions">
+      <button class="action-btn" id="monthlyPdf">⇩ Export PDF</button><button class="action-btn" id="monthlyBackup">▤ Save backup</button><button class="action-btn" id="monthlyImport">＋ Import data</button><button class="action-btn" id="clearMonth">⌫ Clear month</button>
+    </div><p class="small-note">Your entries save in this browser as you type.</p></div>
+  </div>
+</section>
+
+<section class="page" id="weekly">
+  <div class="page-head">
+    <div><div class="eyebrow">02 / The game plan</div><h1>Weekly Planner</h1></div>
+    <div class="date-controls"><button class="month-arrow" id="prevWeek">‹</button><div class="date-label" id="weekLabel"></div><button class="month-arrow" id="nextWeek">›</button></div>
+  </div>
+  <div class="week-grid" id="weekGrid"></div>
+  <div class="week-lower">
+    <div class="panel"><h3>Weekly priorities ✦</h3><div class="line-list" data-list="weekly-priorities"></div></div>
+    <div class="panel"><h3>Creative time</h3><div class="line-list" data-list="weekly-creative"><label class="line-row"><input type="checkbox"><input class="line-input" placeholder="Studio / make / write"></label></div></div>
+    <div class="panel"><h3>Outside + movement</h3><div class="line-list" data-list="weekly-outside"></div></div>
+    <div class="panel"><h3>Notes + reminders</h3><textarea class="field notes-area" data-key="weekly-notes" placeholder="Things to remember this week..."></textarea></div>
+  </div>
+</section>
+
+<section class="page" id="daily">
+  <div class="page-head">
+    <div><div class="eyebrow">03 / The everyday</div><h1>Daily Planner</h1></div>
+    <div class="date-controls"><button class="month-arrow" id="prevDay">‹</button><div class="date-label" id="dayLabel"></div><button class="month-arrow" id="nextDay">›</button><input type="date" id="dayPicker" class="line-input" style="max-width:145px"></div>
+  </div>
+  <div class="daily-layout">
+    <div class="panel">
+      <h2>Today's schedule</h2><div class="schedule" id="schedule"></div>
+    </div>
+    <div class="daily-right">
+      <div class="panel"><h3>Today's intention ✦</h3><textarea class="field" data-key="daily-intention" placeholder="How do I want to feel today?"></textarea></div>
+      <div class="task-columns">
+        <div class="panel"><h3>Must do</h3><div class="line-list" data-list="daily-must"></div></div>
+        <div class="panel"><h3>Would love to do</h3><div class="line-list" data-list="daily-love"></div></div>
+        <div class="panel"><h3>Bonus</h3><div class="line-list" data-list="daily-bonus"></div></div>
+      </div>
+      <div class="panel"><h3>Notes / ideas / thoughts</h3><textarea class="field notes-area" data-key="daily-notes" placeholder="A place for ideas, observations, and anything on your mind..."></textarea></div>
+      <div class="panel"><h3>End-of-day reflection ✦</h3><textarea class="field" data-key="daily-reflection" placeholder="What went well? What did I enjoy? What do I want to carry into tomorrow?"></textarea></div>
+    </div>
+  </div>
+</section>
+</main>
+<div class="footer-row"><span>THE EVERYDAY+ · MAKE ROOM FOR YOUR LIFE</span><span id="lastSaved">Saved locally in this browser</span></div>
+</div>
+<script>
+const STORE='theEverydayPlus_v1';
+let data={};
+let current=new Date(); current.setHours(12,0,0,0);
+let weekDate=new Date(current), dayDate=new Date(current);
+const pad=n=>String(n).padStart(2,'0');
+const dateKey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const monthKey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}`;
+const weekStart=d=>{let x=new Date(d);x.setDate(x.getDate()-((x.getDay()+6)%7));return x};
+function load(){try{data=JSON.parse(localStorage.getItem(STORE)||'{}')}catch{data={}}}
+function save(){localStorage.setItem(STORE,JSON.stringify(data));document.getElementById('saveLabel').textContent='On';document.getElementById('lastSaved').textContent='Saved locally · '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
+function scope(){let p=document.querySelector('.page.active').id;return p==='monthly'?monthKey(current):p==='weekly'?dateKey(weekStart(weekDate)):dateKey(dayDate)}
+function getBucket(){let k=scope();data[k]=data[k]||{};return data[k]}
+function fieldKey(el){return el.dataset.key}
+function hydrateFields(){document.querySelectorAll('textarea[data-key]').forEach(el=>{let v=getBucket()[fieldKey(el)];el.value=v||''})}
+function bindFields(){document.querySelectorAll('textarea[data-key]').forEach(el=>{el.addEventListener('input',()=>{getBucket()[fieldKey(el)]=el.value;save()})})}
+function makeLines(container,count=4,key){container.innerHTML='';for(let i=0;i<count;i++){let row=document.createElement('label');row.className='line-row';let cb=document.createElement('input');cb.type='checkbox';let input=document.createElement('input');input.className='line-input';input.placeholder='Add a note...';let k=key+'-'+i;let b=getBucket();cb.checked=!!b[k+'-done'];input.value=b[k]||'';cb.addEventListener('change',()=>{getBucket()[k+'-done']=cb.checked;save()});input.addEventListener('input',()=>{getBucket()[k]=input.value;save()});row.append(cb,input);container.append(row)}}
+function renderLists(){document.querySelectorAll('[data-list]').forEach(el=>makeLines(el,el.dataset.list==='weekly-creative'?4:4,el.dataset.list))}
+function renderCalendar(){let cal=document.getElementById('calendar');cal.innerHTML='';['SUN','MON','TUE','WED','THU','FRI','SAT'].forEach(x=>{let d=document.createElement('div');d.className='weekday';d.textContent=x;cal.append(d)});let first=new Date(current.getFullYear(),current.getMonth(),1),start=first.getDay(),days=new Date(current.getFullYear(),current.getMonth()+1,0).getDate();for(let i=0;i<Math.ceil((start+days)/7)*7;i++){let cell=document.createElement('div');cell.className='day-cell';let n=i-start+1;if(n>0&&n<=days){let d=new Date(current.getFullYear(),current.getMonth(),n);if(dateKey(d)===dateKey(new Date()))cell.classList.add('today');let num=document.createElement('div');num.className='day-num';num.textContent=n;let ta=document.createElement('textarea');ta.placeholder='Add...';let k='calendar-'+dateKey(d);ta.value=getBucket()[k]||'';ta.addEventListener('input',()=>{getBucket()[k]=ta.value;save()});cell.append(num,ta)}cal.append(cell)}}
+function renderMonth(){document.getElementById('monthTitle').textContent=current.getFullYear();document.getElementById('monthLabel').textContent=current.toLocaleDateString(undefined,{month:'long',year:'numeric'});renderCalendar();hydrateFields();renderLists()}
+function renderWeek(){let start=weekStart(weekDate),end=new Date(start);end.setDate(end.getDate()+6);document.getElementById('weekLabel').textContent=start.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' – '+end.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});let grid=document.getElementById('weekGrid');grid.innerHTML='';for(let i=0;i<7;i++){let d=new Date(start);d.setDate(start.getDate()+i);let box=document.createElement('div');box.className='panel week-day';let title=document.createElement('h3');title.textContent=d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});box.append(title);let list=document.createElement('div');list.className='line-list';let key='week-'+dateKey(d);for(let j=0;j<6;j++){let row=document.createElement('label');row.className='line-row';let cb=document.createElement('input');cb.type='checkbox';let inp=document.createElement('input');inp.className='line-input';inp.placeholder=j===0?'Work / class / plans':'Add...';let b=getBucket();cb.checked=!!b[key+'-'+j+'-done'];inp.value=b[key+'-'+j]||'';cb.addEventListener('change',()=>{getBucket()[key+'-'+j+'-done']=cb.checked;save()});inp.addEventListener('input',()=>{getBucket()[key+'-'+j]=inp.value;save()});row.append(cb,inp);list.append(row)}box.append(list);grid.append(box)}hydrateFields();renderLists()}
+function renderDaily(){document.getElementById('dayLabel').textContent=dayDate.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'});document.getElementById('dayPicker').value=dateKey(dayDate);let s=document.getElementById('schedule');s.innerHTML='';for(let h=8;h<=21;h++){let t=document.createElement('div');t.className='time';t.textContent=(h%12||12)+':00 '+(h<12?'AM':'PM');let inp=document.createElement('input');let k='schedule-'+h;inp.placeholder='What is happening?';inp.value=getBucket()[k]||'';inp.addEventListener('input',()=>{getBucket()[k]=inp.value;save()});s.append(t,inp)}hydrateFields();renderLists()}
+function renderAll(){renderMonth();renderWeek();renderDaily()}
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===id));if(id==='monthly')renderMonth();if(id==='weekly')renderWeek();if(id==='daily')renderDaily()}
+document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+document.getElementById('prevMonth').onclick=()=>{current.setMonth(current.getMonth()-1);renderMonth()};
+document.getElementById('nextMonth').onclick=()=>{current.setMonth(current.getMonth()+1);renderMonth()};
+document.getElementById('prevWeek').onclick=()=>{weekDate.setDate(weekDate.getDate()-7);renderWeek()};
+document.getElementById('nextWeek').onclick=()=>{weekDate.setDate(weekDate.getDate()+7);renderWeek()};
+document.getElementById('prevDay').onclick=()=>{dayDate.setDate(dayDate.getDate()-1);renderDaily()};
+document.getElementById('nextDay').onclick=()=>{dayDate.setDate(dayDate.getDate()+1);renderDaily()};
+document.getElementById('dayPicker').onchange=e=>{if(e.target.value){dayDate=new Date(e.target.value+'T12:00:00');renderDaily()}};
+function exportPDF(){window.print()}
+function backup(){let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='the-everyday-plus-backup.json';a.click();URL.revokeObjectURL(a.href)}
+function importData(file){let r=new FileReader();r.onload=()=>{try{let incoming=JSON.parse(r.result);if(!incoming||typeof incoming!=='object'||Array.isArray(incoming))throw Error();data=incoming;save();renderAll();alert('Planner backup imported.')}catch{alert('That file could not be read as a planner backup.')}};r.readAsText(file)}
+document.getElementById('pdfBtn').onclick=exportPDF;document.getElementById('monthlyPdf').onclick=exportPDF;
+document.getElementById('backupBtn').onclick=backup;document.getElementById('monthlyBackup').onclick=backup;
+document.getElementById('importBtn').onclick=()=>document.getElementById('importFile').click();document.getElementById('monthlyImport').onclick=()=>document.getElementById('importFile').click();
+document.getElementById('importFile').onchange=e=>{if(e.target.files[0])importData(e.target.files[0]);e.target.value=''};
+document.getElementById('clearMonth').onclick=()=>{if(confirm('Clear saved entries for this month?')){delete data[monthKey(current)];save();renderMonth()}};
+load();bindFields();renderAll();
+</script>
+</body>
+</html>
